@@ -11,7 +11,7 @@ def listar_archivos_recursivo(ruta):
 
     Estados:
         - Base: Cuando el elemento actual es un archivo (no hay más recursión).
-        - Recursivo: Cuando el elemento es un directorio (se llama a sí mismo).
+        - Recursivo: Cuando el elemento es un directorio (u otro subdirectorio) (se llama a sí mismo).
     """
 
     # Verificamos si la ruta existe
@@ -19,22 +19,23 @@ def listar_archivos_recursivo(ruta):
         print(f"Error: La ruta '{ruta}' no existe.")
         return
 
-    # Recorremos cada elemento en el directorio actual (incluyendo subdirectorios)
-    # si se removiera el for, se detendria al encontrar un archivo del directorio actual, sin ir por los subdirectorios 
-    # notese como se le pasa el "ruta" y luego hace ruta_completa equivalente al subdirectorio encontrado en ruta
     for nombre in os.listdir(ruta):
-        ruta_completa = os.path.join(ruta, nombre)  # Ruta absoluta del elemento
+        # os.listdir devuelve una lista de todos los directorios dentro del directorio que le pasemos,
+        # o sea el for itera POR CADA uno de esos directorios de la lista
+
+        ruta_completa = os.path.join(ruta, nombre)
+        #agregamos los subdirectorios de la ruta absoluta para poder buscar subsubdirectorios o archivos
 
         # --- Estado Base ---
         # Si es un archivo, lo imprimimos y terminamos la recursión para este elemento.
         if os.path.isfile(ruta_completa):
-            print(f"Archivo: {ruta_completa}")
+            print(f"Archivo: {ruta_completa}") # no recursivo, base 
 
         # --- Estado Recursivo ---
         # Si es un directorio, lo imprimimos y llamamos a la función recursivamente.
         elif os.path.isdir(ruta_completa):
             print(f"Directorio: {ruta_completa}")
-            listar_archivos_recursivo(ruta_completa)  # Llamada recursiva
+            listar_archivos_recursivo(ruta_completa)  # Llamada recursiva !!!!
 
 
 # Codigo para correrlo desde la terminal pasando argumentos de sistema 

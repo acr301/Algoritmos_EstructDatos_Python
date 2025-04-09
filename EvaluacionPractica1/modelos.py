@@ -1,28 +1,29 @@
-from funcionesAuxiliares import validar_calificacion
-
+# Clase Estudiante que representa a un estudiante con sus datos y métodos relacionados
 class Estudiante:
-    def __init__(self, nombre, edad, carrera, calificaciones=None):
+    def __init__(self, nombre, edad, carrera):
         self.nombre = nombre
         self.edad = edad
         self.carrera = carrera
-                         # que sea una sola calificacion, si ES QUE HAY una, si no, (varias) una lista
-        self.calificaciones = calificaciones if calificaciones is not None else []
+        self.calificaciones = []
 
+    # Método para agregar una calificación válida al estudiante
     def agregar_calificacion(self, nota):
-        nota_validada = validar_calificacion(nota)
+        if 0 <= nota <= 100:
+            self.calificaciones.append(nota)
+        else:
+            print("La calificación debe estar entre 0 y 100.")
 
-        # si de verdad hay una nota_validada
-        if nota_validada is not None:
-            self.calificaciones.append(nota_validada)
-            print(f"Nota {nota_validada} agregada a {self.nombre}.")
+    # Método para calcular el promedio de calificaciones
+    def promedio(self):
+        if self.calificaciones:
+            return sum(self.calificaciones) / len(self.calificaciones)
+        else:
+            return 0.0
 
-
-# RegistroEstudiantes tiene (contiene objetos Estudiante)
-#
-class RegistroEstudiantes:
-    def __init__(self):
-        # es decir, esta es una lista de objetos de la clase Estudiante
-        self.estudiantes = []
-
-    def agregar_estudiante(self, estudiante):
-        self.estudiantes.append(estudiante)
+    # Método para mostrar la información completa del estudiante
+    def mostrar_info(self):
+        print(f"Nombre: {self.nombre}")
+        print(f"Edad: {self.edad}")
+        print(f"Carrera: {self.carrera}")
+        print(f"Calificaciones: {self.calificaciones}")
+        print(f"Promedio: {self.promedio():.2f}")

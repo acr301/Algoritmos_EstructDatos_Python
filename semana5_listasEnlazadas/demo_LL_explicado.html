@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista Enlazada Explicada</title>
+  <style>
+    canvas { border: 1px solid black; margin-top: 20px; }
+    input, button { margin: 5px; }
+    #explicacion {
+      margin-top: 20px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      background-color: #eef;
+      padding: 10px;
+      border-left: 5px solid #3366cc;
+    }
+  </style>
+</head>
+<body>
+  <h2>Lista Enlazada Visual</h2>
+  <input type="text" id="value" placeholder="Valor">
+  <input type="number" id="position" placeholder="Posición">
+  <button onclick="insertAtBeginning()">Insertar al Inicio</button>
+  <button onclick="insertAtEnd()">Insertar al Final</button>
+  <button onclick="insertAtPosition()">Insertar en Posición</button>
+  <button onclick="deleteAtPosition()">Eliminar en Posición</button>
+  <canvas id="canvas" width="1000" height="300"></canvas>
+  <div id="explicacion"></div>
+
+  <script>
+    function mostrarExplicacion(texto) {
+      document.getElementById("explicacion").innerText = texto;
+    }
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const nodeWidth = 60;
+    const nodeHeight = 40;
+    const spacing = 100;
+
+    function generarHex() {
+      return Math.floor(Math.random() * 0xFFFF).toString(16).padStart(4, '0');
+    }
+
+    class Nodo {
+      constructor(valor) {
+        this.valor = valor;
+        this.direccion = generarHex();
+        this.siguiente = null;
+      }
+    }
+
+    class ListaEnlazada {
+      constructor() {
+        this.head = null;
+        this.length = 0;
+      }
+
+      insertarInicio(valor) {
+        const nuevoNodo = new Nodo(valor);
+        const anteriorHead = this.head;
+        this.head = nuevoNodo;
+        this.head.siguiente = anteriorHead;
+        this.length++;
+        this.dibujar();
+
+        mostrarExplicacion(`🟢 Insertar al inicio:\n1. Se crea un nodo con valor "${valor}" y dirección ${nuevoNodo.direccion}.\n2. El nuevo nodo apunta al anterior head (${anteriorHead ? anteriorHead.direccion : 'null'}).\n3. El nuevo nodo se convierte en el head.`);
+      }
+
+      insertarFinal(valor) {
+        const nuevoNodo = new Nodo(valor);
+        if (!this.head) {
+          this.head = nuevoNodo;
+          mostrarExplicacion(`🟡 Lista vacía. Se crea head con valor "${valor}" y dirección ${nuevoNodo.direccion}.`);
+        } else {
+          let actual = this.head;
+          while (actual.siguiente) actual = actual.siguiente;
+          actual.siguiente = nuevoNodo;
+          mostrarExplicacion(`🟡 Insertar al final:\n1. Se recorre la lista hasta el tail.\n2. Nodo final (${actual.direccion}) apunta al nuevo nodo (${nuevoNodo.direccion}).\n3. El nuevo nodo apunta a null.`);
+        }
+        this.length++;
+        this.dibujar();
+      }
+
+      insertarEnPosicion(valor, posicion) {
+        if (posicion < 1 || posicion > this.length + 1) return alert("Posición inválida");
+        if (posicion === 1) return this.insertarInicio(valor);
+
+        const nuevoNodo = new Nodo(valor);
+        let actual = this.head;
+        for (let i = 1; i < posicion - 1; i++) actual = actual.siguiente;
+
+        nuevoNodo.siguiente = actual.siguiente;
+        actual.siguiente = nuevoNodo;
+        this.length++;
+        this.dibujar();
+
+        mostrarExplicacion(`🔵 Insertar en posición ${posicion}:\n1. Se recorre la lista ${posicion - 1} pasos.\n2. Se crea nodo (${nuevoNodo.direccion}) con valor "${valor}".\n3. Nodo ${actual.direccion} apunta al nuevo nodo.\n4. El nuevo nodo apunta a ${nuevoNodo.siguiente ? nuevoNodo.siguiente.direccion : 'null'}.`);
+      }
+
+      eliminarEnPosicion(posicion) {
+        if (posicion < 1 || posicion > this.length) return alert("Posición inválida");
+        let eliminado;
+        if (posicion === 1) {
+          eliminado = this.head;
+          this.head = this.head.siguiente;
+        } else {
+          let actual = this.head;
+          for (let i = 1; i < posicion - 1; i++) actual = actual.siguiente;
+          eliminado = actual.siguiente;
+          actual.siguiente = eliminado.siguiente;
+        }
+        this.length--;
+        this.dibujar();
+
+        mostrarExplicacion(`🔴 Eliminar en posición ${posicion}:\n1. Se recorre la lista ${posicion - 1} veces.\n2. Nodo eliminado: ${eliminado.valor} (${eliminado.direccion}).\n3. Nodo anterior apunta a ${eliminado.siguiente ? eliminado.siguiente.direccion : 'null'}.`);
+      }
+
+      dibujar() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let actual = this.head;
+        let x = 50;
+        let y = 100;
+
+        while (actual) {
+          ctx.strokeRect(x, y, nodeWidth, nodeHeight);
+          ctx.beginPath();
+          ctx.moveTo(x + nodeWidth / 2, y);
+          ctx.lineTo(x + nodeWidth / 2, y + nodeHeight);
+          ctx.stroke();
+
+          ctx.fillText(actual.valor, x + 10, y + 25);
+          ctx.fillText(actual.direccion, x + 40, y + 25);
+
+          if (actual.siguiente) {
+            ctx.beginPath();
+            ctx.moveTo(x + nodeWidth, y + nodeHeight / 2);
+            ctx.lineTo(x + spacing, y + nodeHeight / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x + spacing - 10, y + nodeHeight / 2 - 5);
+            ctx.lineTo(x + spacing, y + nodeHeight / 2);
+            ctx.lineTo(x + spacing - 10, y + nodeHeight / 2 + 5);
+            ctx.fill();
+          }
+          x += spacing;
+          actual = actual.siguiente;
+        }
+        ctx.fillText("null", x, y + 25);
+      }
+    }
+
+    const lista = new ListaEnlazada();
+
+    function insertAtBeginning() {
+      const valor = document.getElementById('value').value;
+      if (valor) lista.insertarInicio(valor);
+    }
+
+    function insertAtEnd() {
+      const valor = document.getElementById('value').value;
+      if (valor) lista.insertarFinal(valor);
+    }
+
+    function insertAtPosition() {
+      const valor = document.getElementById('value').value;
+      const pos = parseInt(document.getElementById('position').value);
+      if (valor && pos) lista.insertarEnPosicion(valor, pos);
+    }
+
+    function deleteAtPosition() {
+      const pos = parseInt(document.getElementById('position').value);
+      if (pos) lista.eliminarEnPosicion(pos);
+    }
+  </script>
+</body>
+</html>

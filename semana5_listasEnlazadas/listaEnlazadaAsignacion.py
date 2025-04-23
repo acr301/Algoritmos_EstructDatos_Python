@@ -6,54 +6,86 @@ o	Método para determinar si la lista está vacía.
 o	Agregar método que imprima el último valor de la lista.
 """
 
+
+# Nodo individual
 class Nodo:
     def __init__(self, valor):
         self.valor = valor
         self.referencia = None 
 
+# Coleccion/Contenedor de Nodos (lista enlazada)
 class ListaEnlazada:
     def __init__(self, head=None):
         self.head = head
 
+    # insercion al inicio
     def agregar(self, nuevo_nodo):
-        actual = self.head
-        if actual:
-            while actual.referencia:
-                actual = actual.referencia
-            actual.referencia = nuevo_nodo
+
+        # creamos un objeto actual para no perder la referencia al primer nodo 
+        actual = self.head 
+
+        if actual: # si el primer nodo existe 
+            while actual.referencia: # mientras haya una referencia en dicho nodo (no es tail)
+                actual = actual.referencia # asignamos una referencia distinta a None 
+
+                # el bucle rompe cuando finalmente llegamos a uno cuya referencia sea None (tail)
+            actual.referencia = nuevo_nodo # y entonces a ese ultimo elemento (tail) asignamos el nuevo nodo.
         else:
-            self.head = nuevo_nodo
+            self.head = nuevo_nodo # si no existe (lista vacia), directamente hacemos el nuevo nodo el head. 
+
+    
+    # esta funcion es lo mismo (un actual para no perder la referencia), sin embargo,
+    # itera hasta que encuentre el valor dado 
 
     def eliminar(self, valor):
+
         actual = self.head
-        if actual.valor == valor:
-            self.head = actual.referencia
-        else:
+
+        if actual.valor == valor: # si el valor es el del nodo head 
+            self.head = actual.referencia # entonces, hacemos del head la referencia (el nodo siguiente, el segundo)
+
+        else: # cualquier otro nodo 
             while actual:
-                if actual.valor == valor:
-                    break
-                anterior = actual
-                actual = actual.referencia 
-            if actual == None:
-                return
-            anterior.referencia = actual.referencia
-            actual = None
+                if actual.valor == valor: # si encuentra el valor buscado
+                    break # deja de buscar (rompe el bucle)
+
+                # convierte un anterior en actual, que sera una referencia para que no
+                # perdamos el hilo al eliminar el actual 
+                anterior = actual 
+
+                # lo enlaza 
+                actual = actual.referencia
+
+        
+            if actual == None: # si el nodo a eliminar es el tail, no tenemos que preocuparnos por referencias  
+                return 
+
+
+            anterior.referencia = actual.referencia # movemos el enlace del que eliminaremos al que esta antes,
+            actual = None # para poder eliminarlo sin perder el hilo.
+
 
     def insertar(self, nuevo_elemento, posicion):
         contador = 1
         actual = self.head
-        if posicion == 1:
+
+        if posicion == 1: # si insertamos un nodo head 
             nuevo_elemento.referencia = self.head
             self.head = nuevo_elemento
-        while actual:
-            if contador+1 == posicion:
-                nuevo_elemento.referencia = actual.referencia
-                actual.referencia = nuevo_elemento
+
+
+        while actual: # si no es head, iteramos
+            if contador+1 == posicion: # si estamos justo una posicion antes de en la que queremos insertar 
+                nuevo_elemento.referencia = actual.referencia # guardamos el enlace del que le precede 
+                actual.referencia = nuevo_elemento # y hacemos que apunte al que insertamos
                 return
-            else:
+            else: # si no, seguimos buscando
                 contador += 1
                 actual = actual.referencia
 
+
+    # aprovechando las strings, con tal que haya una referencia ira apuntando al siguiente nodo con ->
+    # y rompera el bucle con un ultimo -> a None
     def print(self):
         actual = self.head
         while actual:
@@ -61,6 +93,7 @@ class ListaEnlazada:
             actual = actual.referencia
         print("None")
 
+    # itera como tantos nodos haya hasta llegar al cuya referencia es None
     def longitudLista(self):
         contador = 0
         actual = self.head
@@ -69,18 +102,22 @@ class ListaEnlazada:
             actual = actual.referencia
         return contador
 
-    def estaVacia(self):
+    def estaVacia(self): # sencillo metodo con operador de identidad para ver si, al pasar la lista, no hay ninguna direccion a esta (mas bien a None).
+        # o sea no hay ni siquiera un head
         return self.head is None
+
 
     def ultimoValor(self):
         actual = self.head
         if not actual:
-            return None
+            return None # no hay nodo ultimo, esta vacia
         while actual.referencia:
             actual = actual.referencia
-        return actual.valor
+        return actual.valor # rompe el bucle cuando ya no haya referencias, retorna el valor del ultimo
 
 def menu():
+
+    #instanciamos la clase ListaEnlazada
     lista = ListaEnlazada()
     
     while True:
@@ -98,10 +135,16 @@ def menu():
         
         if opcion == "1":
             valor = input("Ingrese el valor del nuevo nodo: ")
+
+            #instanciamos un nodo 
             nuevo_nodo = Nodo(valor)
+
+            #lo agregamos a la instancia de ListaEnlazada
             lista.agregar(nuevo_nodo)
             print(f"Nodo con valor '{valor}' agregado al final.")
         
+
+        # creo que el resto se explican solos. 
         elif opcion == "2":
             if lista.estaVacia():
                 print("La lista está vacía, se agregará como primer elemento.")
